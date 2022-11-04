@@ -1,0 +1,3 @@
+[submodule "OpenAssetIO"]
+	path = OpenAssetIO
+	url = https://github.com/OpenAssetIO/OpenAssetIO.git
