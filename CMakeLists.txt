@@ -139,6 +139,9 @@ if (OPENASSETIOTEST_ENABLE_PYTHON)
         Python::Python
     )
     target_compile_features(test.python.bridge PRIVATE cxx_std_17)
+    # If libpython is linked in as a static library, then we must export
+    # symbols for dynamically loaded Python extension modules to use.
+    set_target_properties(test.python.bridge PROPERTIES ENABLE_EXPORTS ON)
 
     # Storage for list of environment variables to set before running
     # the test.
