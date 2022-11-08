@@ -3,8 +3,23 @@
 
 cmake_minimum_required(VERSION 3.21)
 
-project(OpenAssetIO-Test-CMake)
+# Set a default build type if none was specified.
+# The CMake default is toolchain-specific so ensure consistency by
+# having an explicit default.
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    message(STATUS "Setting build type to 'Release' as none was specified.")
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+    # Set the possible values of build type for cmake-gui, ccmake
+    set_property(
+        CACHE CMAKE_BUILD_TYPE
+        PROPERTY STRINGS
+        "Debug"
+        "Release"
+        "MinSizeRel"
+        "RelWithDebInfo")
+endif ()
 
+project(OpenAssetIO-Test-CMake)
 enable_testing()
 
 #-----------------------------------------------------------------------
@@ -139,6 +154,9 @@ if (OPENASSETIOTEST_ENABLE_PYTHON)
         Python::Python
     )
     target_compile_features(test.python.bridge PRIVATE cxx_std_17)
+    # If libpython is linked in as a static library, then we must export
+    # symbols for dynamically loaded Python extension modules to use.
+    set_target_properties(test.python.bridge PROPERTIES ENABLE_EXPORTS ON)
 
     # Storage for list of environment variables to set before running
     # the test.
