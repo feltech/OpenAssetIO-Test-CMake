@@ -3,6 +3,8 @@
 
 cmake_minimum_required(VERSION 3.21)
 
+message(WARNING "Just testing")
+
 # Set a default build type if none was specified.
 # The CMake default is toolchain-specific so ensure consistency by
 # having an explicit default.
