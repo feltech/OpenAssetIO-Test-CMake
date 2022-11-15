@@ -46,3 +46,8 @@ repository for more information.
 > Python test targets are currently unsupported in this mode. If
 > `OPENASSETIOTEST_ENABLE_PYTHON` is `ON` (default) then CMake will fail
 > to configure with an error.
+
+## Development notes
+
+This package follows the main
+[OpenAssetIO contribution process](https://github.com/OpenAssetIO/OpenAssetIO/blob/main/contributing/PROCESS.md).
