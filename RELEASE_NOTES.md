@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-vX.X.X
+v1.0.0-alpha.1
 --------------
 
 ### New Features
