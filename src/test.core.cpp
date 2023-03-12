@@ -28,5 +28,4 @@
 int main() {
   auto traits = openassetio::TraitsData::make();
   traits->setTraitProperty("a", "b", openassetio::Str{"c"});
-  return 0;
 }

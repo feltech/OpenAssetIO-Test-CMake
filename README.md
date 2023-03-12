@@ -12,9 +12,11 @@ Python components can be imported.
 
 ## Getting started
 
-This application can link against OpenAssetIO in two modes, depending on
-the value of the `OPENASSETIOTEST_ENABLE_SUBPROJECT` CMake variable -
-see below.
+This application can link against its dependent libraries, OpenAssetIO
+and OpenAssetIO-MediaCreation in two modes, depending on
+the value of the `OPENASSETIOTEST_ENABLE_OPENASSETIO_SUBPROJECT` and
+`OPENASSETIOTEST_ENABLE_MEDIACREATION_SUBPROJECT` CMake variables
+respectively - see below.
 
 The usual CMake steps can be used to build and run the tests. Assuming
 the current working directory is at the root of the repository:
@@ -25,21 +27,30 @@ cmake --build build
 ctest --test-dir build
 ```
 
-### `OPENASSETIOTEST_ENABLE_SUBPROJECT=OFF` (default)
+### Dependency Modes
 
-When `OPENASSETIOTEST_ENABLE_SUBPROJECT=OFF` (which is the default if
-unspecified), OpenAssetIO will be discovered as a CMake package
-(`find_package(OpenAssetIO)`) and so OpenAssetIO must be pre-built and
-installed into one of [find_package](https://cmake.org/cmake/help/v3.21/command/find_package.html)'s
+This project has two main dependencies, `OpenAssetIO` and
+`OpenAssetIO-MediaCreation`. They can be discovered in two ways.
+
+#### CMake Packages
+
+When either `OPENASSETIOTEST_ENABLE_OPENASSETIO_SUBPROJECT` or
+`OPENASSETIOTEST_ENABLE_MEDIACREATION_SUBPROJECT` are set to `OFF`
+(which is the default if unspecified), the package will be discovered as
+a CMake package (`find_package(...)`) and so the package must be
+pre-built and installed into one of
+[find_package](https://cmake.org/cmake/help/v3.21/command/find_package.html)'s
 configured search paths.
 
-### `OPENASSETIOTEST_ENABLE_SUBPROJECT=ON`
+#### Subprojects
 
-When `OPENASSETIOTEST_ENABLE_SUBPROJECT=ON`, the `OpenAssetIO` git
-submodule under this repository must be populated. OpenAssetIO will then
-be built as a subproject (`add_subdirectory(OpenAssetIO)`) and so all
-its dependencies must be discoverable by CMake. See the OpenAssetIO
-repository for more information.
+When either `OPENASSETIOTEST_ENABLE_OPENASSETIO_SUBPROJECT` or
+`OPENASSETIOTEST_ENABLE_MEDIACREATION_SUBPROJECT`are set to `ON`, the
+package git submodule under this repository must be populated. The
+package will then be built as a subproject (`add_subdirectory(...)`) and
+so all its dependencies must be discoverable by CMake. See the
+OpenAssetIO and OpenAssetIO-MediaCreation repositories for more
+information.
 
 > **Note**
 >
