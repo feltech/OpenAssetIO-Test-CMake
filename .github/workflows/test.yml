@@ -1,0 +1,163 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2022 The Foundry Visionmongers Ltd
+
+# Test building a project including OpenAssetIO and MediaCreation in
+# various submodule/cmake-find combinations.
+name: Test
+on:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-openassetio:
+    name: Build OpenAssetIO
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/openassetio/openassetio-build
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build
+        uses: ./.github/build_openassetio
+
+  build-openassetio-mediacreation:
+    name: Build OpenAssetIO-MediaCreation
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/openassetio/openassetio-build
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build
+        uses: ./.github/build_openassetio_mediacreation
+
+  test-no-submodule:
+    name: Test (OpenAssetIO as package, MediaCreation as package)
+    runs-on: ubuntu-latest
+    container:
+      image: aswf/ci-vfxall:2022-clang14.3
+    needs: [build-openassetio, build-openassetio-mediacreation]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get OpenAssetIO
+        uses: actions/download-artifact@v3
+        with:
+          name: OpenAssetIO Build
+          path: ${{ github.workspace }}/openassetio-build
+
+      - name: Get OpenAssetIO-MediaCreation
+        uses: actions/download-artifact@v3
+        with:
+          name: OpenAssetIO MediaCreation Build
+          path: ${{ github.workspace }}/openassetio-mediacreation-build
+
+      - name: Configure CMake build
+        run: >
+          cmake -S .
+          -DCMAKE_PREFIX_PATH="`pwd`/openassetio-build;`pwd`/openassetio-mediacreation-build"
+          -B build -G Ninja
+
+      - name: Build tests
+        run: cmake --build build
+
+      - name: Test
+        run: ctest -VV --test-dir build
+
+  test-submodule-openassetio-find-mediacreation:
+    name: Test (OpenAssetIO as subproject, MediaCreation as package)
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/openassetio/openassetio-build
+    needs: [build-openassetio-mediacreation]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get OpenAssetIO-MediaCreation
+        uses: actions/download-artifact@v3
+        with:
+          name: OpenAssetIO MediaCreation Build
+          path: ./openassetio-mediacreation-build
+
+      - name: "Get Submodules"
+        run: git submodule update --init --recursive OpenAssetIO
+
+      - name: Configure CMake build
+        run: >
+          cmake -S .
+          -DCMAKE_PREFIX_PATH="`pwd`/openassetio-mediacreation-build"
+          -DOPENASSETIOTEST_ENABLE_PYTHON="OFF"
+          -DOPENASSETIO_ENABLE_C="ON"
+          -DOPENASSETIOTEST_ENABLE_OPENASSETIO_SUBPROJECT="ON"
+          -B build -G Ninja
+
+      - name: Build tests
+        run: cmake --build build
+
+      - name: Test
+        run: ctest -VV --test-dir build
+
+  test-find-openassetio-submodule-mediacreation:
+    name: Test (OpenAssetIO as package, MediaCreation as subproject)
+    runs-on: ubuntu-latest
+    container:
+      image: aswf/ci-vfxall:2022-clang14.3
+    needs: [build-openassetio]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get OpenAssetIO
+        uses: actions/download-artifact@v3
+        with:
+          name: OpenAssetIO Build
+          path: ./openassetio-build
+
+      - name: Install Traitgen
+        run: |
+          python -m pip install git+https://github.com/OpenAssetIO/OpenAssetIO-TraitGen
+
+      - name: "Get Submodules"
+        run: git submodule update --init --recursive OpenAssetIO-MediaCreation
+
+      - name: Configure CMake build
+        run: >
+          cmake -S .
+          -DCMAKE_PREFIX_PATH="`pwd`/openassetio-build"
+          -DOPENASSETIOTEST_ENABLE_MEDIACREATION_SUBPROJECT="ON"
+          -B build -G Ninja
+
+      - name: Build tests
+        run: cmake --build build
+
+      - name: Test
+        run: ctest -VV --test-dir build
+
+  test-all-submodule:
+    name: Test (OpenAssetIO as subproject, MediaCreation as subproject)
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/openassetio/openassetio-build
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Traitgen
+        run: |
+          python -m pip install git+https://github.com/OpenAssetIO/OpenAssetIO-TraitGen
+
+      - name: "Get Submodules"
+        run: git submodule update --init --recursive
+
+      - name: Configure CMake build
+        run: >
+          cmake -S . -B build -G Ninja
+          -DOPENASSETIOTEST_ENABLE_PYTHON="OFF"
+          -DOPENASSETIO_ENABLE_C="ON"
+          -DOPENASSETIOTEST_ENABLE_OPENASSETIO_SUBPROJECT="ON"
+          -DOPENASSETIOTEST_ENABLE_MEDIACREATION_SUBPROJECT="ON"
+
+      - name: Build tests
+        run: cmake --build build
+
+      - name: Test
+        run: ctest -VV --test-dir build
