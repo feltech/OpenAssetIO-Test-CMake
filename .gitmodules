@@ -1,3 +1,8 @@
 [submodule "OpenAssetIO"]
 	path = OpenAssetIO
 	url = https://github.com/OpenAssetIO/OpenAssetIO.git
+	branch = main
+[submodule "OpenAssetIO-MediaCreation"]
+	path = OpenAssetIO-MediaCreation
+	url = https://github.com/OpenAssetIO/OpenAssetIO-MediaCreation.git
+	branch = main

@@ -26,6 +26,8 @@ enable_testing()
 # Options
 
 option(OPENASSETIOTEST_ENABLE_SUBPROJECT "Use OpenAssetIO as a subproject" OFF)
+option(OPENASSETIO_MEDIACREATIONTEST_ENABLE_SUBPROJECT
+       "Use OpenAssetIO-MediaCreation as a subproject" OFF)
 option(OPENASSETIOTEST_ENABLE_PYTHON "Test Python bindings" ON)
 option(OPENASSETIOTEST_ENABLE_C "Test C bindings" ON)
 
@@ -40,7 +42,9 @@ endif ()
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     message(STATUS "New C++11 ABI for GCC               = ${OPENASSETIOTEST_GLIBCXX_USE_CXX11_ABI}")
 endif ()
-message(STATUS "Testing OpenAssetIO as a subproject = ${OPENASSETIOTEST_ENABLE_SUBPROJECT}")
+message(STATUS "Testing OpenAssetIO as a subproject = ${OPENASSETIOTEST_ENABLE_OPENASSETIO_SUBPROJECT}")
+message(STATUS "Testing OpenAssetIO-MediaCreation as a subproject = "
+               "${OPENASSETIOTEST_ENABLE_MEDIACREATION_SUBPROJECT}")
 message(STATUS "Testing OpenAssetIO Python bindings = ${OPENASSETIOTEST_ENABLE_PYTHON}")
 message(STATUS "Testing OpenAssetIO C bindings      = ${OPENASSETIOTEST_ENABLE_C}")
 
@@ -48,7 +52,7 @@ message(STATUS "Testing OpenAssetIO C bindings      = ${OPENASSETIOTEST_ENABLE_C
 #-----------------------------------------------------------------------
 # OpenAssetIO dependency.
 
-if (OPENASSETIOTEST_ENABLE_SUBPROJECT)
+if (OPENASSETIOTEST_ENABLE_OPENASSETIO_SUBPROJECT)
     # Use OpenAssetIO as a subproject.
     #
     # This will add to the project using `add_subdirectory`.
@@ -66,13 +70,30 @@ else ()
     find_package(OpenAssetIO REQUIRED)
 endif ()
 
+if (OPENASSETIOTEST_ENABLE_MEDIACREATION_SUBPROJECT)
+    # Use OpenAssetIO-MediaCreation as a subproject.
+    #
+    # This will add to the project using `add_subdirectory`.
+
+    add_subdirectory(OpenAssetIO-MediaCreation)
+else ()
+    # Use OpenAssetIO-MediaCreation as an external CMake package
+    #
+    # The `OpenAssetIO-MediaCreationConfig.cmake` file must be
+    # discoverable. E.g. add the install directory (`dist`) to
+    # CMAKE_PREFIX_PATH.
+
+    find_package(OpenAssetIO-MediaCreation REQUIRED)
+endif ()
+
+
 # For Windows tests to work we must add the dlls to the PATH
 if (WIN32 AND DEFINED OpenAssetIO_BINARY_DIR)
     file(TO_NATIVE_PATH "${OpenAssetIO_BINARY_DIR}" OpenAssetIO_BINARY_DIR_NATIVE)
 endif ()
 
 #-----------------------------------------------------------------------
-# C++ tests.
+# C++ OpenAssetIO tests.
 
 add_executable(test.cpp.core src/test.core.cpp)
 add_test(cpp.core test.cpp.core)
@@ -91,6 +112,28 @@ endif ()
 if (WIN32 AND DEFINED OpenAssetIO_BINARY_DIR)
     set_tests_properties(cpp.core PROPERTIES ENVIRONMENT "PATH=${OpenAssetIO_BINARY_DIR_NATIVE}")
 endif ()
+
+#-----------------------------------------------------------------------
+# C++ MediaCreation tests.
+
+add_executable(test.cpp.mediacreation src/test.mediacreation.cpp)
+add_test(cpp.mediacreation test.cpp.mediacreation)
+target_link_libraries(test.cpp.mediacreation PRIVATE OpenAssetIO::openassetio-core OpenAssetIO-MediaCreation::openassetio-mediacreation)
+target_compile_features(test.cpp.mediacreation PRIVATE cxx_std_17)
+
+# GCC's C++11 ABI toggle must match OpenAssetIO's settings.
+if (DEFINED OPENASSETIOTEST_GLIBCXX_USE_CXX11_ABI)
+    if (OPENASSETIOTEST_GLIBCXX_USE_CXX11_ABI)
+        target_compile_definitions(test.cpp.mediacreation PRIVATE _GLIBCXX_USE_CXX11_ABI=1)
+    else ()
+        target_compile_definitions(test.cpp.mediacreation PRIVATE _GLIBCXX_USE_CXX11_ABI=0)
+    endif ()
+endif ()
+
+if (WIN32 AND DEFINED OpenAssetIO_BINARY_DIR)
+    set_tests_properties(cpp.mediacreation PROPERTIES ENVIRONMENT "PATH=${OpenAssetIO_BINARY_DIR_NATIVE}")
+endif ()
+
 
 #-----------------------------------------------------------------------
 # C tests.
