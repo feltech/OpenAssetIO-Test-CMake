@@ -2,16 +2,9 @@
 // Copyright 2022 The Foundry Visionmongers Ltd
 #include <stdio.h>
 
-// Include all headers to test they are where we expect and can be
-// compiled.
 #include <openassetio/c/InfoDictionary.h>
 #include <openassetio/c/StringView.h>
 #include <openassetio/c/errors.h>
-#include <openassetio/c/hostApi/Manager.h>
-#include <openassetio/c/managerApi/CManagerInterface.h>
-#include <openassetio/c/managerApi/HostSession.h>
-#include <openassetio/c/managerApi/ManagerInterface.h>
-#include <openassetio/c/namespace.h>
 
 #define kStringBufferCapacity 500
 
