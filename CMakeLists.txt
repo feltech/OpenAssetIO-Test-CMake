@@ -142,6 +142,10 @@ if (OPENASSETIOTEST_ENABLE_C)
     add_executable(test.c.core src/test.core.c)
     add_test(c.core test.c.core)
     target_link_libraries(test.c.core PRIVATE OpenAssetIO::openassetio-core-c)
+    # Must use C++ linker settings or the C++ standard library might not
+    # be linked. This is required since openassetio-core-c depends on
+    # openassetio-core, which is a C++ library.
+    set_target_properties(test.c.core PROPERTIES LINKER_LANGUAGE CXX)
     target_compile_features(test.c.core PRIVATE c_std_99)
     if (WIN32 AND DEFINED OpenAssetIO_BINARY_DIR)
         set_tests_properties(c.core PROPERTIES ENVIRONMENT "PATH=${OpenAssetIO_BINARY_DIR_NATIVE}")
