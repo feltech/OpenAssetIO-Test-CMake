@@ -4,6 +4,11 @@ Release Notes
 v1.0.0-alpha.x
 --------------
 
+### Breaking Changes
+
+* Update to use non-deprecated `TraitsData` path/namespace.
+  [#13](https://github.com/OpenAssetIO/OpenAssetIO-Test-CMake/pull/13)
+
 ### New Features
 
 * OpenAssetIO-MediaCreation integrated as a dependency, with tests.
